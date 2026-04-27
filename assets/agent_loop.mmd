@@ -1,0 +1,5 @@
+flowchart TD
+    U["User message"] --> G["Gemini 1.5 Flash"]
+    G -->|"function_call parts"| T["SchedulerTools"]
+    T -->|"function_response parts"| G
+    G -->|"no more function calls"| R["Plain-text reply"]

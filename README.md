@@ -54,17 +54,7 @@ All 36 tests run without a Gemini API key.
 
 ### Agent loop (`agent/scheduler_agent.py`)
 
-```
-User message
-    │
-    ▼
-Gemini 1.5 Flash  ──── function_call parts ────►  SchedulerTools
-    ▲                                                    │
-    └──────────────── function_response parts ───────────┘
-    │
-    ▼  (no more function calls)
-Plain-text reply
-```
+![Agent loop](assets/agent_loop.png)
 
 `SchedulerAgent` passes Python callables as tools; the SDK builds the JSON
 schema from their signatures and docstrings.  The manual tool loop in `run()`
@@ -72,9 +62,15 @@ iterates until Gemini returns a message with no `function_call` parts.
 
 ### Shared state
 
+![Architecture](assets/architecture.png)
+
 `SchedulerAgent` accepts an existing `SchedulerTools` instance so the AI chat
 and the manual Streamlit UI operate on the **same** `Schedule` object — any
 task the agent adds is immediately visible in the task table.
+
+### Class diagram
+
+![Class diagram](assets/class_diagram.png)
 
 ### Available tools
 

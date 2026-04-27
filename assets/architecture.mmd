@@ -1,0 +1,15 @@
+flowchart LR
+    subgraph UI ["Streamlit UI — app.py"]
+        Manual["Manual\nScheduling Form"]
+        Chat["AI Chat\nAssistant"]
+    end
+    subgraph Agent ["agent/"]
+        SA["SchedulerAgent\nscheduler_agent.py"]
+        Tools["SchedulerTools\ntools.py"]
+    end
+    Schedule[("Schedule\nshared state")]
+
+    Manual --> Tools
+    Chat --> SA
+    SA --> Tools
+    Tools <--> Schedule
