@@ -1,5 +1,5 @@
 flowchart TD
-    U["User message"] --> G["Gemini 1.5 Flash"]
-    G -->|"function_call parts"| T["SchedulerTools"]
-    T -->|"function_response parts"| G
-    G -->|"no more function calls"| R["Plain-text reply"]
+    U["User message"] --> G["Groq LLaMA-3.3-70B"]
+    G -->|"tool_calls"| T["SchedulerTools"]
+    T -->|"tool results"| G
+    G -->|"no more tool calls"| R["Plain-text reply"]

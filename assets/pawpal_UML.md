@@ -2,14 +2,16 @@
 
 ```mermaid
 classDiagram
-    class Owner {
-        +String name
-        +String email
-        +int availableMinutes
-        +List~String~ preferences
-        +addPet(pet: Pet) void
-        +setAvailableTime(minutes: int) void
-        +getPreferences() List~String~
+    class Task {
+        +String task_type
+        +int duration_minutes
+        +int priority
+        +String notes
+        +bool is_completed
+        +complete() void
+        +is_high_priority() bool
+        +get_summary() String
+        +to_dict() dict
     }
 
     class Pet {
@@ -17,39 +19,39 @@ classDiagram
         +String breed
         +String size
         +String species
-        +int ageYears
-        +String healthNotes
-        +getName() String
-        +getProfile() dict
-        +updateHealthNotes(notes: String) void
+        +int age_years
+        +String health_notes
+        +get_profile() dict
+        +update_health_notes(notes: String) void
     }
 
-    class CareTask {
-        +String taskType
-        +int durationMinutes
-        +int priority
-        +bool isCompleted
-        +String notes
-        +complete() void
-        +isHighPriority() bool
-        +getSummary() String
+    class Owner {
+        +String name
+        +String email
+        +int available_minutes
+        +List~Pet~ pets
+        +List~String~ preferences
+        +add_pet(pet: Pet) void
+        +set_available_time(minutes: int) void
+        +get_preferences() List~String~
     }
 
-    class DailyScheduler {
+    class Schedule {
         +Owner owner
         +Pet pet
-        +List~CareTask~ tasks
-        +List~CareTask~ scheduledPlan
-        +addTask(task: CareTask) void
-        +removeTask(taskType: String) void
-        +generatePlan() List~CareTask~
-        +explainPlan() String
-        +getTotalDuration() int
-        +resetPlan() void
+        +List~Task~ tasks
+        +add_task(task: Task) void
+        +remove_task(task_type: String) int
+        +generate_plan() List~Task~
+        +get_total_duration() int
+        +is_over_budget() bool
+        +check_conflicts() List~String~
+        +explain_plan() String
+        +to_dict() dict
     }
 
-    Owner "1" --> "1" Pet : owns
-    Owner "1" --> "1" DailyScheduler : uses
-    DailyScheduler "1" --> "many" CareTask : schedules
-    Pet "1" --> "many" CareTask : requires
+    Schedule "1" --> "1" Owner : belongs to
+    Schedule "1" --> "1" Pet : tracks
+    Schedule "1" --> "*" Task : contains
+    Owner "1" --> "*" Pet : owns
 ```
