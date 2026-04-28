@@ -624,13 +624,13 @@ with tab_schedule:
 
 # ── TAB 3 — AI Assistant ──────────────────────────────────────────────────────
 with tab_ai:
-    has_key = bool(os.environ.get("GEMINI_API_KEY"))
+    has_key = bool(os.environ.get("GROQ_API_KEY"))
 
     if not has_key:
         st.markdown("""
         <div class="empty-state">
           <div class="icon">🔑</div>
-          <p>Add <code>GEMINI_API_KEY=your_key</code> to <code>.env</code> to enable AI.</p>
+          <p>Add <code>GROQ_API_KEY=your_key</code> to <code>.env</code> to enable AI.</p>
         </div>
         """, unsafe_allow_html=True)
     elif not st.session_state.tools:

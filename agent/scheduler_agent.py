@@ -1,19 +1,21 @@
 """
-PawPal+ Scheduler Agent — Gemini function-calling loop.
+PawPal+ Scheduler Agent — OpenAI function-calling loop.
 
 Flow:
-  1. User message → Gemini (with tool schemas from callable signatures/docstrings)
-  2. Gemini emits FunctionCall parts → we execute matching tool closures
-  3. Tool results sent back → Gemini emits next response
-  4. Repeat until Gemini returns a plain-text message (no more function calls)
+  1. User message → OpenAI (with tool schemas)
+  2. OpenAI emits tool_calls → we execute matching tool closures
+  3. Tool results sent back → OpenAI emits next response
+  4. Repeat until OpenAI returns a plain-text message (no more tool calls)
 
 The tool closures each close over a single SchedulerTools instance so the
 agent and the Streamlit UI can share the same Schedule state.
 """
 
 import os
+import json
+from typing import Optional
 from dotenv import load_dotenv
-import google.generativeai as genai
+from openai import OpenAI
 
 from agent.tools import SchedulerTools
 
@@ -30,10 +32,98 @@ Guidelines:
 - Durations are always in minutes.
 """
 
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "add_task",
+            "description": "Add a pet care task. priority is 1 (lowest) to 10 (highest).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "task_type":        {"type": "string", "description": "Name of the care task"},
+                    "duration_minutes": {"type": "integer", "description": "Duration in minutes"},
+                    "priority":         {"type": "integer", "description": "Priority 1–10"},
+                    "notes":            {"type": "string", "description": "Optional notes"},
+                },
+                "required": ["task_type", "duration_minutes", "priority"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "remove_task",
+            "description": "Remove all tasks with the given name from the schedule.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "task_type": {"type": "string"},
+                },
+                "required": ["task_type"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_tasks",
+            "description": "Return all tasks currently in the schedule as JSON.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_schedule",
+            "description": "Return the prioritised schedule (highest priority first).",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "check_conflicts",
+            "description": "Check for budget overruns, duplicate tasks, or all-completed state.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "complete_task",
+            "description": "Mark all tasks with the given name as completed.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "task_type": {"type": "string"},
+                },
+                "required": ["task_type"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_summary",
+            "description": "Return a high-level summary: owner, pet, task count, and budget status.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "reset_schedule",
+            "description": "Clear every task from the schedule.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+]
+
 
 class SchedulerAgent:
     """
-    Wraps a Gemini chat session with a manual tool loop.
+    Wraps an OpenAI chat session with a manual tool loop.
 
     Pass an existing SchedulerTools instance via `tools_instance` to share
     state with the Streamlit UI; omit it to create a fresh one.
@@ -44,110 +134,61 @@ class SchedulerAgent:
         owner_name: str = "Owner",
         pet_name: str = "Pet",
         available_minutes: int = 120,
-        tools_instance: SchedulerTools | None = None,
+        tools_instance: Optional[SchedulerTools] = None,
     ):
-        api_key = os.environ.get("GEMINI_API_KEY")
+        api_key = os.environ.get("GROQ_API_KEY")
         if not api_key:
             raise ValueError(
-                "GEMINI_API_KEY is not set. "
-                "Add GEMINI_API_KEY=<your_key> to your .env file."
+                "GROQ_API_KEY is not set. "
+                "Add GROQ_API_KEY=<your_key> to your .env file."
             )
-        genai.configure(api_key=api_key)
+        self._client = OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
 
         self._inst = tools_instance or SchedulerTools(
             owner_name, pet_name, available_minutes
         )
-        inst = self._inst  # shorthand for closures below
+        inst = self._inst
 
-        # --------------------------------------------------------------- tools
-        # Each closure delegates to SchedulerTools and returns a plain string.
-        # The SDK reads the function signature + one-line docstring to build
-        # the JSON schema it sends to Gemini.
-
-        def add_task(task_type: str, duration_minutes: int, priority: int, notes: str = "") -> str:
-            """Add a pet care task. priority is 1 (lowest) to 10 (highest)."""
-            return inst.add_task(task_type, duration_minutes, priority, notes)
-
-        def remove_task(task_type: str) -> str:
-            """Remove all tasks with the given name from the schedule."""
-            return inst.remove_task(task_type)
-
-        def list_tasks() -> str:
-            """Return all tasks currently in the schedule as JSON."""
-            return inst.list_tasks()
-
-        def get_schedule() -> str:
-            """Return the prioritised schedule (highest priority first)."""
-            return inst.get_schedule()
-
-        def check_conflicts() -> str:
-            """Check for budget overruns, duplicate tasks, or all-completed state."""
-            return inst.check_conflicts()
-
-        def complete_task(task_type: str) -> str:
-            """Mark all tasks with the given name as completed."""
-            return inst.complete_task(task_type)
-
-        def get_summary() -> str:
-            """Return a high-level summary: owner, pet, task count, and budget status."""
-            return inst.get_summary()
-
-        def reset_schedule() -> str:
-            """Clear every task from the schedule."""
-            return inst.reset_schedule()
-
-        self._tool_map: dict[str, object] = {
-            "add_task": add_task,
-            "remove_task": remove_task,
-            "list_tasks": list_tasks,
-            "get_schedule": get_schedule,
-            "check_conflicts": check_conflicts,
-            "complete_task": complete_task,
-            "get_summary": get_summary,
-            "reset_schedule": reset_schedule,
+        self._tool_map = {
+            "add_task":       lambda **kw: inst.add_task(**kw),
+            "remove_task":    lambda **kw: inst.remove_task(**kw),
+            "list_tasks":     lambda **kw: inst.list_tasks(),
+            "get_schedule":   lambda **kw: inst.get_schedule(),
+            "check_conflicts":lambda **kw: inst.check_conflicts(),
+            "complete_task":  lambda **kw: inst.complete_task(**kw),
+            "get_summary":    lambda **kw: inst.get_summary(),
+            "reset_schedule": lambda **kw: inst.reset_schedule(),
         }
 
-        self.model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
-            tools=list(self._tool_map.values()),
-            system_instruction=SYSTEM_PROMPT,
-        )
-        self.chat = self.model.start_chat()
+        self._messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
     # ----------------------------------------------------------------- public
 
     def run(self, user_message: str) -> str:
         """Send *user_message* and run the tool loop until a text reply arrives."""
-        response = self.chat.send_message(user_message)
+        self._messages.append({"role": "user", "content": user_message})
 
-        # Tool loop — Gemini may chain multiple rounds of function calls before
-        # producing a final text response.
         while True:
-            function_calls = [
-                part.function_call
-                for part in response.parts
-                if hasattr(part, "function_call") and part.function_call.name
-            ]
-            if not function_calls:
-                break
+            response = self._client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                tools=TOOLS,
+                messages=self._messages,
+            )
+            msg = response.choices[0].message
+            self._messages.append(msg)
 
-            # Execute every function call and collect results
-            result_parts = []
-            for fc in function_calls:
-                fn = self._tool_map.get(fc.name)
-                result = fn(**dict(fc.args)) if fn else f"Unknown tool: {fc.name}"
-                result_parts.append(
-                    genai.protos.Part(
-                        function_response=genai.protos.FunctionResponse(
-                            name=fc.name,
-                            response={"result": result},
-                        )
-                    )
-                )
+            if not msg.tool_calls:
+                return msg.content
 
-            response = self.chat.send_message(result_parts)
-
-        return response.text
+            for tc in msg.tool_calls:
+                fn = self._tool_map.get(tc.function.name)
+                args = json.loads(tc.function.arguments) or {}
+                result = fn(**args) if fn else f"Unknown tool: {tc.function.name}"
+                self._messages.append({
+                    "role": "tool",
+                    "tool_call_id": tc.id,
+                    "content": result,
+                })
 
     @property
     def schedule(self):
