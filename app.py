@@ -193,12 +193,26 @@ h1, h2, h3, h4 { font-family: 'Nunito', sans-serif !important; }
     border-radius: 16px !important;
     border: 1.5px solid #BAE6FD !important;
     background: white !important;
+    color: #1e293b !important;
+    caret-color: #0ea5e9 !important;
     font-size: 0.9rem !important;
     box-shadow: 0 2px 8px rgba(14,165,233,0.08) !important;
 }
 [data-testid="stChatInput"] textarea:focus {
     border-color: #0ea5e9 !important;
     box-shadow: 0 0 0 3px rgba(14,165,233,0.12) !important;
+    color: #1e293b !important;
+}
+[data-testid="stChatMessage"] {
+    background: white !important;
+    border: 1px solid #BAE6FD !important;
+    border-radius: 16px !important;
+    color: #1e293b !important;
+}
+[data-testid="stChatMessage"] p,
+[data-testid="stChatMessage"] span,
+[data-testid="stChatMessage"] div {
+    color: #1e293b !important;
 }
 
 /* ══════════════════════════════════════════════════════════════
