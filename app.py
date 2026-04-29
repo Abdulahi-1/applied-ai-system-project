@@ -9,380 +9,571 @@ load_dotenv()
 
 # ── page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="PawPal+",
+    page_title="PawPal+ · Smart Pet Care",
     page_icon="🐾",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
+# ── helpers ────────────────────────────────────────────────────────────────────
+def task_icon(name: str) -> str:
+    n = name.lower()
+    if any(w in n for w in ["walk", "run", "hike", "exercise", "jog"]): return "🦮"
+    if any(w in n for w in ["feed", "food", "meal", "eat", "breakfast", "dinner", "lunch"]): return "🍖"
+    if any(w in n for w in ["groom", "bath", "brush", "wash", "trim", "nail", "fur"]): return "✂️"
+    if any(w in n for w in ["play", "game", "toy", "fetch", "tug", "fun"]): return "🎾"
+    if any(w in n for w in ["vet", "doctor", "health", "medicine", "pill", "shot", "vaccine", "checkup"]): return "💊"
+    if any(w in n for w in ["train", "training", "sit", "stay", "heel", "command", "obedience"]): return "🏆"
+    if any(w in n for w in ["sleep", "rest", "nap", "bed", "crate"]): return "💤"
+    if any(w in n for w in ["potty", "toilet", "outside", "poop", "bathroom", "litter"]): return "🌿"
+    if any(w in n for w in ["socializ", "park", "friend", "dog park"]): return "🐾"
+    return "🐾"
+
 # ── CSS ────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
+h1, h2, h3, h4 { font-family: 'Nunito', sans-serif !important; }
 #MainMenu, footer, header { visibility: hidden; }
 
-/* ── sidebar ─────────────────────────────────────────────── */
+/* ── page background ─────────────────────────────────────────── */
+.stApp { background: #F0F9FF !important; }
+.main .block-container { padding: 1.75rem 2.25rem 5rem; max-width: 1060px; }
+
+/* ── sidebar ─────────────────────────────────────────────────── */
 [data-testid="stSidebar"] > div:first-child {
-    background: linear-gradient(175deg, #1a1040 0%, #2d1b69 50%, #1e3a5f 100%);
+    background: linear-gradient(175deg, #0c1a3a 0%, #1e3a8a 50%, #0369a1 100%);
     padding-top: 0;
 }
 [data-testid="stSidebar"] label,
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] div { color: rgba(255,255,255,0.9) !important; }
+
 [data-testid="stSidebar"] .stTextInput input,
 [data-testid="stSidebar"] .stNumberInput input {
-    background: rgba(255,255,255,0.10) !important;
-    border: 1px solid rgba(255,255,255,0.20) !important;
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
     border-radius: 10px !important;
     color: white !important;
     caret-color: white !important;
     -webkit-text-fill-color: white !important;
-    padding: 0.55rem 0.9rem !important;
+    padding: 0.6rem 0.9rem !important;
+    font-size: 0.875rem !important;
+    transition: border-color 0.2s, background 0.2s !important;
 }
-[data-testid="stSidebar"] .stTextInput input::placeholder { color: rgba(255,255,255,0.45) !important; }
+[data-testid="stSidebar"] .stTextInput input:focus,
+[data-testid="stSidebar"] .stNumberInput input:focus {
+    background: rgba(255,255,255,0.13) !important;
+    border-color: rgba(125,211,252,0.7) !important;
+}
+[data-testid="stSidebar"] .stTextInput input::placeholder { color: rgba(255,255,255,0.35) !important; }
 [data-testid="stSidebar"] .stNumberInput input { -webkit-text-fill-color: white !important; }
 [data-testid="stSidebar"] .stSelectbox > div > div {
-    background: rgba(255,255,255,0.10) !important;
-    border: 1px solid rgba(255,255,255,0.20) !important;
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
     border-radius: 10px !important;
+    font-size: 0.875rem !important;
 }
-[data-testid="stSidebar"] .stSlider > div { padding: 0 !important; }
 [data-testid="stSidebar"] .stButton > button {
     width: 100% !important;
-    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%) !important;
+    background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%) !important;
     border: none !important;
     color: white !important;
     border-radius: 12px !important;
-    font-weight: 700 !important;
-    font-size: 0.95rem !important;
-    padding: 0.75rem 1rem !important;
-    box-shadow: 0 4px 20px rgba(124,58,237,0.45) !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 0.9rem !important;
+    padding: 0.8rem 1rem !important;
+    box-shadow: 0 4px 20px rgba(14,165,233,0.4) !important;
     transition: all 0.2s !important;
-    letter-spacing: 0.01em !important;
 }
 [data-testid="stSidebar"] .stButton > button:hover {
-    box-shadow: 0 6px 25px rgba(124,58,237,0.6) !important;
-    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 28px rgba(14,165,233,0.6) !important;
+    transform: translateY(-2px) !important;
 }
 [data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.12) !important;
+    border-color: rgba(255,255,255,0.10) !important;
     margin: 1rem 0 !important;
 }
 
-/* ── main layout ─────────────────────────────────────────── */
-.main .block-container { padding: 1.5rem 2rem 4rem; max-width: 1000px; }
-
-/* ── tabs ────────────────────────────────────────────────── */
+/* ── tabs ────────────────────────────────────────────────────── */
 .stTabs [data-baseweb="tab-list"] {
-    background: #f1f5f9;
-    border-radius: 14px;
+    background: rgba(224,242,254,0.8);
+    border-radius: 16px;
     padding: 5px;
     gap: 4px;
-    border: none;
+    border: 1px solid #BAE6FD;
+    box-shadow: 0 2px 12px rgba(14,165,233,0.08);
 }
 .stTabs [data-baseweb="tab"] {
-    border-radius: 10px !important;
-    padding: 0.55rem 1.4rem !important;
-    font-weight: 600 !important;
-    font-size: 0.9rem !important;
-    color: #64748b !important;
+    border-radius: 11px !important;
+    padding: 0.55rem 1.5rem !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem !important;
+    color: #0369a1 !important;
     background: transparent !important;
     border: none !important;
     transition: all 0.2s !important;
 }
 .stTabs [aria-selected="true"] {
     background: white !important;
-    color: #4f46e5 !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.10) !important;
+    color: #0284c7 !important;
+    box-shadow: 0 2px 12px rgba(14,165,233,0.15) !important;
 }
 .stTabs [data-baseweb="tab-panel"] { padding-top: 1.5rem !important; }
 
-/* ── form inputs ─────────────────────────────────────────── */
+/* ── form inputs ─────────────────────────────────────────────── */
 .stTextInput input, .stNumberInput input {
     border-radius: 11px !important;
-    border: 1.5px solid #e2e8f0 !important;
-    padding: 0.6rem 0.9rem !important;
-    font-size: 0.93rem !important;
+    border: 1.5px solid #BAE6FD !important;
+    padding: 0.65rem 0.95rem !important;
+    font-size: 0.9rem !important;
     background: white !important;
     color: #1e293b !important;
-    caret-color: #6366f1 !important;
+    caret-color: #0ea5e9 !important;
+    box-shadow: 0 1px 3px rgba(14,165,233,0.06) !important;
     transition: border-color 0.2s, box-shadow 0.2s !important;
 }
 .stTextInput input:focus, .stNumberInput input:focus {
-    border-color: #6366f1 !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.12) !important;
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 0 3px rgba(14,165,233,0.12) !important;
     background: white !important;
 }
 .stSelectbox > div > div {
     border-radius: 11px !important;
-    border: 1.5px solid #e2e8f0 !important;
+    border: 1.5px solid #BAE6FD !important;
     background: white !important;
     color: #1e293b !important;
+    box-shadow: 0 1px 3px rgba(14,165,233,0.06) !important;
 }
 
-/* ── buttons (main) ──────────────────────────────────────── */
+/* ── buttons ─────────────────────────────────────────────────── */
 .stButton > button {
     border-radius: 10px !important;
-    font-weight: 600 !important;
-    font-size: 0.88rem !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.875rem !important;
     transition: all 0.2s !important;
-    border: 1.5px solid #e2e8f0 !important;
+    border: 1.5px solid #BAE6FD !important;
     background: white !important;
-    color: #334155 !important;
+    color: #0369a1 !important;
+    box-shadow: 0 1px 4px rgba(14,165,233,0.08) !important;
 }
 .stButton > button:hover {
     transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.10) !important;
-    border-color: #c7d2fe !important;
+    box-shadow: 0 4px 14px rgba(14,165,233,0.14) !important;
+    border-color: #7DD3FC !important;
+    background: #F0F9FF !important;
 }
 
-/* ── progress bar ────────────────────────────────────────── */
+/* ── progress bar ────────────────────────────────────────────── */
 .stProgress > div > div > div {
-    background: linear-gradient(90deg, #6366f1, #a78bfa) !important;
+    background: linear-gradient(90deg, #38bdf8, #7dd3fc) !important;
     border-radius: 100px !important;
 }
 .stProgress > div > div {
-    background: #e2e8f0 !important;
+    background: #E0F2FE !important;
     border-radius: 100px !important;
 }
 
-/* ── alerts ──────────────────────────────────────────────── */
+/* ── alerts ──────────────────────────────────────────────────── */
 .stSuccess { border-radius: 12px !important; }
 .stWarning { border-radius: 12px !important; }
 .stError   { border-radius: 12px !important; }
 .stInfo    { border-radius: 12px !important; }
 
-/* ── chat ────────────────────────────────────────────────── */
+/* ── chat ────────────────────────────────────────────────────── */
 [data-testid="stChatInput"] textarea {
-    border-radius: 14px !important;
-    border: 1.5px solid #e2e8f0 !important;
-    background: #fafbff !important;
-    font-size: 0.93rem !important;
+    border-radius: 16px !important;
+    border: 1.5px solid #BAE6FD !important;
+    background: white !important;
+    font-size: 0.9rem !important;
+    box-shadow: 0 2px 8px rgba(14,165,233,0.08) !important;
 }
 [data-testid="stChatInput"] textarea:focus {
-    border-color: #6366f1 !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.12) !important;
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 0 3px rgba(14,165,233,0.12) !important;
 }
 
-/* ── custom component styles ─────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   CUSTOM COMPONENTS
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── hero ────────────────────────────────────────────────────── */
 .paw-hero {
-    background: linear-gradient(135deg, #1a1040 0%, #2d1b69 40%, #1e3a5f 100%);
-    border-radius: 20px;
+    background: linear-gradient(135deg, #0c1a3a 0%, #1e3a8a 45%, #0369a1 100%);
+    border-radius: 24px;
     padding: 2rem 2.5rem;
     color: white;
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    margin-bottom: 1.75rem;
-    box-shadow: 0 8px 32px rgba(79,70,229,0.25);
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 40px rgba(14,165,233,0.28);
+    position: relative;
+    overflow: hidden;
 }
-.paw-hero .emoji-bubble {
-    width: 72px; height: 72px;
-    background: rgba(255,255,255,0.14);
+.paw-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: rgba(186,230,253,0.06);
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 2.2rem;
-    flex-shrink: 0;
-    backdrop-filter: blur(4px);
 }
-.paw-hero h2 { margin: 0; font-size: 1.65rem; font-weight: 800; letter-spacing: -0.02em; }
-.paw-hero p  { margin: 0.25rem 0 0; opacity: 0.75; font-size: 0.92rem; }
+.paw-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: 80px;
+    width: 150px; height: 150px;
+    background: rgba(125,211,252,0.07);
+    border-radius: 50%;
+}
+.paw-hero .pet-avatar {
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.4rem;
+    flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.15);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.paw-hero .hero-content { flex: 1; }
+.paw-hero h2 {
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    font-family: 'Nunito', sans-serif !important;
+}
+.paw-hero .hero-sub { margin: 0.3rem 0 0.6rem; opacity: 0.65; font-size: 0.88rem; }
+.paw-hero .pill-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .paw-hero .pill {
-    display: inline-block;
-    background: rgba(255,255,255,0.18);
+    display: inline-flex; align-items: center;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
     border-radius: 100px;
-    padding: 3px 12px;
+    padding: 4px 12px;
     font-size: 0.75rem;
-    font-weight: 600;
-    margin-top: 0.5rem;
-    letter-spacing: 0.03em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: 'Nunito', sans-serif;
+}
+.paw-hero .hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+.paw-hero .hstat {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    padding: 0.6rem 1rem;
+    text-align: center;
+    min-width: 70px;
+}
+.paw-hero .hstat .hval {
+    font-size: 1.5rem; font-weight: 900; line-height: 1;
+    font-family: 'Nunito', sans-serif;
+}
+.paw-hero .hstat .hlbl {
+    font-size: 0.65rem; opacity: 0.55;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-top: 2px; font-weight: 700;
 }
 
-.stat-row { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+/* ── section label ───────────────────────────────────────────── */
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #38BDF8;
+    margin: 1.5rem 0 0.75rem;
+    font-family: 'Nunito', sans-serif;
+}
+.section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, #BAE6FD, transparent);
+}
+
+/* ── stat cards ──────────────────────────────────────────────── */
 .stat-card {
     flex: 1;
     background: white;
-    border-radius: 16px;
-    padding: 1.1rem 1.25rem;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    text-align: center;
+    border-radius: 18px;
+    padding: 1.1rem 1.25rem 1rem;
+    border: 1px solid #BAE6FD;
+    box-shadow: 0 2px 10px rgba(14,165,233,0.07);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    position: relative;
+    overflow: hidden;
 }
-.stat-card .val { font-size: 1.9rem; font-weight: 800; color: #1e293b; line-height: 1; }
-.stat-card .lbl { font-size: 0.73rem; color: #94a3b8; margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 18px 18px 0 0;
+}
+.stat-card.blue::before  { background: linear-gradient(90deg, #0ea5e9, #38bdf8); }
+.stat-card.green::before { background: linear-gradient(90deg, #10b981, #34d399); }
+.stat-card.red::before   { background: linear-gradient(90deg, #ef4444, #f87171); }
+.stat-card.sky::before   { background: linear-gradient(90deg, #7dd3fc, #bae6fd); }
+.stat-card .val  { font-size: 2rem; font-weight: 900; color: #1e293b; line-height: 1; font-family: 'Nunito', sans-serif; }
 .stat-card .val.red   { color: #ef4444; }
 .stat-card .val.green { color: #10b981; }
-.stat-card .val.blue  { color: #6366f1; }
+.stat-card .val.blue  { color: #0284c7; }
+.stat-card .val.sky   { color: #0ea5e9; }
+.stat-card .lbl { font-size: 0.7rem; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 700; }
 
-.section-title {
-    font-size: 0.78rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #94a3b8;
-    margin: 1.5rem 0 0.75rem;
-}
-
-.task-card {
-    background: white;
-    border-radius: 14px;
-    padding: 0.9rem 1.1rem;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
-    transition: box-shadow 0.2s;
-}
-.task-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-.task-card .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-.task-card .name { font-weight: 600; font-size: 0.95rem; color: #1e293b; }
-.task-card .meta { font-size: 0.8rem; color: #94a3b8; margin-top: 1px; }
-.task-card .badge {
-    margin-left: auto;
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 100px;
-    flex-shrink: 0;
-    letter-spacing: 0.03em;
-}
-.badge-high   { background: #fee2e2; color: #b91c1c; }
-.badge-medium { background: #fef3c7; color: #92400e; }
-.badge-low    { background: #d1fae5; color: #065f46; }
-.done-card { opacity: 0.45; }
-
-.timeline-item {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-    align-items: flex-start;
-}
-.timeline-dot {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #a78bfa);
-    color: white;
-    font-weight: 700;
-    font-size: 0.85rem;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(99,102,241,0.35);
-    margin-top: 2px;
-}
-.timeline-card {
-    flex: 1;
-    background: white;
-    border-radius: 14px;
-    padding: 0.85rem 1.1rem;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-}
-.timeline-card .tname { font-weight: 600; color: #1e293b; font-size: 0.95rem; }
-.timeline-card .tmeta { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
-
-.empty-state {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: #94a3b8;
-}
-.empty-state .icon { font-size: 3rem; margin-bottom: 0.75rem; }
-.empty-state p { font-size: 0.95rem; margin: 0; }
-
-.add-form-card {
-    background: #fafbff;
-    border: 1.5px dashed #c7d2fe;
-    border-radius: 16px;
-    padding: 1.25rem 1.5rem 0.5rem;
-    margin-bottom: 1.25rem;
-}
-
+/* ── budget bar ──────────────────────────────────────────────── */
 .budget-bar-wrap {
     background: white;
-    border-radius: 14px;
-    padding: 1rem 1.25rem;
-    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.1rem 1.4rem;
+    border: 1px solid #BAE6FD;
+    box-shadow: 0 2px 10px rgba(14,165,233,0.06);
     margin-bottom: 1rem;
 }
 .budget-bar-wrap .bar-label {
     display: flex;
     justify-content: space-between;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #64748b;
-    margin-bottom: 0.5rem;
+    align-items: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #6B7280;
+    margin-bottom: 0.6rem;
+    font-family: 'Nunito', sans-serif;
+}
+.budget-bar-wrap .bar-label span:first-child { color: #374151; font-size: 0.88rem; }
+
+/* ── add form card ───────────────────────────────────────────── */
+.add-form-card {
+    background: white;
+    border: 2px solid #BAE6FD;
+    border-radius: 18px;
+    padding: 1.25rem 1.5rem 0.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 12px rgba(14,165,233,0.07);
+}
+.add-form-card .form-header {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: #0284C7;
+    margin-bottom: 0.75rem;
+    font-family: 'Nunito', sans-serif;
 }
 
-.prompt-chip {
-    display: inline-block;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
+/* ── task card ───────────────────────────────────────────────── */
+.task-card {
+    background: white;
+    border-radius: 16px;
+    padding: 0.85rem 1.15rem;
+    border: 1px solid #BAE6FD;
+    box-shadow: 0 2px 8px rgba(14,165,233,0.06);
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 0.55rem;
+    transition: box-shadow 0.2s, transform 0.15s;
+}
+.task-card:hover { box-shadow: 0 6px 20px rgba(14,165,233,0.14); transform: translateY(-1px); }
+.task-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    background: #E0F2FE;
+}
+.task-card .name {
+    font-weight: 700;
+    font-size: 0.93rem;
+    color: #1e293b;
+    font-family: 'Nunito', sans-serif;
+}
+.task-card .meta { font-size: 0.78rem; color: #9CA3AF; margin-top: 2px; }
+.task-card .right { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.task-card .priority-bar { width: 3px; height: 36px; border-radius: 100px; flex-shrink: 0; }
+.done-card { opacity: 0.45; }
+.done-card .name { text-decoration: line-through; }
+
+/* ── badges ──────────────────────────────────────────────────── */
+.badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 3px 10px;
     border-radius: 100px;
-    padding: 5px 14px;
+    letter-spacing: 0.04em;
+    font-family: 'Nunito', sans-serif;
+}
+.badge-high   { background: #FEE2E2; color: #DC2626; }
+.badge-medium { background: #DBEAFE; color: #1D4ED8; }
+.badge-low    { background: #D1FAE5; color: #065f46; }
+
+/* ── timeline ────────────────────────────────────────────────── */
+.timeline-item { display: flex; gap: 1rem; margin-bottom: 0.75rem; align-items: flex-start; }
+.timeline-dot {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+    color: white;
+    font-weight: 900;
+    font-size: 0.88rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(14,165,233,0.4);
+    margin-top: 2px;
+    font-family: 'Nunito', sans-serif;
+}
+.timeline-card {
+    flex: 1;
+    background: white;
+    border-radius: 16px;
+    padding: 0.9rem 1.15rem;
+    border: 1px solid #BAE6FD;
+    box-shadow: 0 2px 8px rgba(14,165,233,0.06);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.timeline-card .ticon {
+    font-size: 1.25rem;
+    width: 38px; height: 38px;
+    background: #E0F2FE;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.timeline-card .tname { font-weight: 700; color: #1e293b; font-size: 0.93rem; font-family: 'Nunito', sans-serif; }
+.timeline-card .tmeta { font-size: 0.78rem; color: #9CA3AF; margin-top: 2px; }
+.timeline-card .tright { margin-left: auto; flex-shrink: 0; }
+
+/* ── empty state ─────────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 3.5rem 1rem;
+    color: #9CA3AF;
+}
+.empty-state .paw-icon { font-size: 2.5rem; margin-bottom: 0.85rem; display: block; opacity: 0.4; }
+.empty-state .etitle { font-size: 1rem; font-weight: 800; color: #6B7280; font-family: 'Nunito', sans-serif; margin-bottom: 0.3rem; }
+.empty-state .esub { font-size: 0.85rem; margin: 0; }
+
+/* ── prompt chips ────────────────────────────────────────────── */
+.chip-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
+.prompt-chip {
+    display: inline-flex;
+    align-items: center;
+    background: white;
+    border: 1.5px solid #BAE6FD;
+    border-radius: 100px;
+    padding: 6px 14px;
     font-size: 0.8rem;
-    color: #475569;
-    cursor: pointer;
-    margin: 3px;
-    font-weight: 500;
+    color: #0284c7;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    box-shadow: 0 1px 4px rgba(14,165,233,0.08);
+}
+
+/* ── sidebar snapshot ────────────────────────────────────────── */
+.snap-grid { display: flex; gap: 0.6rem; margin-bottom: 0.75rem; }
+.snap-cell {
+    flex: 1;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    padding: 0.7rem 0.5rem;
+    text-align: center;
+}
+.snap-cell .sv { font-size: 1.4rem; font-weight: 900; line-height: 1; font-family: 'Nunito', sans-serif; }
+.snap-cell .sl { font-size: 0.62rem; opacity: 0.45; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; font-weight: 700; }
+
+/* ── sidebar section header ──────────────────────────────────── */
+.sb-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 0.55rem;
+    font-family: 'Nunito', sans-serif;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ── constants ──────────────────────────────────────────────────────────────────
-PRIORITY_MAP = {"low": 3, "medium": 6, "high": 9}
+PRIORITY_MAP   = {"low": 3, "medium": 6, "high": 9}
 PRIORITY_LABEL = {3: "Low", 6: "Medium", 9: "High"}
-PRIORITY_COLOR = {3: "#10b981", 6: "#f59e0b", 9: "#ef4444"}
+PRIORITY_COLOR = {3: "#10b981", 6: "#3B82F6", 9: "#ef4444"}
 PRIORITY_BADGE = {3: "badge-low", 6: "badge-medium", 9: "badge-high"}
-SPECIES_EMOJI = {"dog": "🐕", "cat": "🐈", "other": "🐾"}
+SPECIES_EMOJI  = {"dog": "🐕", "cat": "🐈", "other": "🐾"}
 
 # ── session state ──────────────────────────────────────────────────────────────
-if "tools"         not in st.session_state: st.session_state.tools = None
-if "agent"         not in st.session_state: st.session_state.agent = None
-if "chat_history"  not in st.session_state: st.session_state.chat_history = []
+if "tools"        not in st.session_state: st.session_state.tools = None
+if "agent"        not in st.session_state: st.session_state.agent = None
+if "chat_history" not in st.session_state: st.session_state.chat_history = []
 
 def sched():
     return st.session_state.tools.schedule if st.session_state.tools else None
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SIDEBAR — pet profile
+# SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════
-
 with st.sidebar:
-    st.markdown("""
-    <div style="text-align:center; padding: 1.75rem 0 1.25rem;">
-        <div style="font-size:2.6rem; margin-bottom:0.35rem;">🐾</div>
-        <div style="font-size:1.5rem; font-weight:800; color:white; letter-spacing:-0.02em;">PawPal<span style="color:#a78bfa;">+</span></div>
-        <div style="font-size:0.78rem; color:rgba(255,255,255,0.5); margin-top:3px; letter-spacing:0.04em;">SMART PET CARE SCHEDULING</div>
+    st.html("""
+    <div style="text-align:center; padding: 2rem 0 1.4rem;">
+        <div style="display:inline-flex;align-items:center;justify-content:center;
+                    width:64px;height:64px;background:rgba(255,255,255,0.10);
+                    border-radius:18px;font-size:2rem;margin-bottom:0.75rem;
+                    border:1px solid rgba(255,255,255,0.15);
+                    box-shadow:0 4px 20px rgba(0,0,0,0.2);">🐾</div>
+        <div style="font-size:1.6rem;font-weight:900;color:white;letter-spacing:-0.03em;
+                    font-family:'Nunito',sans-serif;">Paw<span style="color:#7DD3FC;">Pal+</span></div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:4px;
+                    letter-spacing:0.12em;font-weight:800;font-family:'Nunito',sans-serif;">
+            SMART PET CARE
+        </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
-    st.markdown('<hr>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.4);margin-bottom:0.6rem;">Owner</div>', unsafe_allow_html=True)
+    st.html('<hr>')
 
-    owner_name        = st.text_input("Your name",            value="Jordan",  label_visibility="collapsed", placeholder="Your name")
-    available_minutes = st.number_input("Daily time (min)",   min_value=10, max_value=480, value=120, label_visibility="collapsed")
+    st.html('<div class="sb-label">Owner</div>')
+    owner_name        = st.text_input("Your name",        value="Jordan", label_visibility="collapsed", placeholder="Your name")
+    available_minutes = st.number_input("Daily time (min)", min_value=10, max_value=480, value=120, label_visibility="collapsed")
 
-    st.markdown('<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.4);margin:0.9rem 0 0.6rem;">Pet Profile</div>', unsafe_allow_html=True)
+    st.html('<div style="height:0.5rem"></div>')
 
-    pet_name = st.text_input("Pet name",  value="Mochi",   label_visibility="collapsed", placeholder="Pet name")
-    breed    = st.text_input("Breed",     value="Mixed",   label_visibility="collapsed", placeholder="Breed")
+    st.html('<div class="sb-label">🐾 Pet Profile</div>')
+    pet_name = st.text_input("Pet name", value="Mochi", label_visibility="collapsed", placeholder="Pet name")
+    breed    = st.text_input("Breed",    value="Mixed", label_visibility="collapsed", placeholder="Breed")
 
     c1, c2 = st.columns(2)
-    with c1: size    = st.selectbox("Size",    ["small","medium","large"],         label_visibility="collapsed")
-    with c2: species = st.selectbox("Species", ["dog","cat","other"],              label_visibility="collapsed")
-    age = st.number_input("Age (years)", min_value=0, max_value=30, value=2,       label_visibility="collapsed")
+    with c1: size    = st.selectbox("Size",    ["small","medium","large"], label_visibility="collapsed")
+    with c2: species = st.selectbox("Species", ["dog","cat","other"],      label_visibility="collapsed")
+    age = st.number_input("Age (years)", min_value=0, max_value=30, value=2, label_visibility="collapsed")
 
-    st.markdown("<div style='height:0.4rem'></div>", unsafe_allow_html=True)
+    st.html("<div style='height:0.5rem'></div>")
 
     if st.button("Save Profile", use_container_width=True):
         existing = list(st.session_state.tools.schedule.tasks) if st.session_state.tools else []
@@ -396,79 +587,106 @@ with st.sidebar:
         st.session_state.tools = tools
         st.session_state.agent = None
         st.session_state.chat_history = []
-        st.success(f"Profile saved!")
+        st.success(f"Profile saved for {pet_name}!")
 
     if st.session_state.tools:
         s = sched()
-        st.markdown('<hr>', unsafe_allow_html=True)
-        total = s.get_total_duration()
-        budget = s.owner.available_minutes
-        pct = min(int(total / budget * 100), 100) if budget else 0
-        remaining = max(budget - total, 0)
-        over = max(total - budget, 0)
+        st.html('<hr>')
+        total         = s.get_total_duration()
+        budget        = s.owner.available_minutes
+        pct           = min(int(total / budget * 100), 100) if budget else 0
+        remaining     = max(budget - total, 0)
+        over          = max(total - budget, 0)
+        done_ct       = sum(1 for t in s.tasks if t.is_completed)
+        budget_status = f'{over} min over' if over else f'{remaining} min free'
 
-        st.markdown(f"""
-        <div style="padding:0 0.25rem;">
-          <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.4);margin-bottom:0.75rem;">Today's Snapshot</div>
-          <div style="display:flex;gap:0.6rem;margin-bottom:0.75rem;">
-            <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:10px;padding:0.7rem;text-align:center;">
-              <div style="font-size:1.4rem;font-weight:800;">{len(s.tasks)}</div>
-              <div style="font-size:0.68rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.05em;">Tasks</div>
+        st.html(f"""
+        <div style="padding:0 0.1rem;">
+          <div class="sb-label">Today's Snapshot</div>
+          <div class="snap-grid">
+            <div class="snap-cell">
+              <div class="sv">{len(s.tasks)}</div>
+              <div class="sl">Tasks</div>
             </div>
-            <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:10px;padding:0.7rem;text-align:center;">
-              <div style="font-size:1.4rem;font-weight:800;">{total}</div>
-              <div style="font-size:0.68rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.05em;">Min</div>
+            <div class="snap-cell">
+              <div class="sv">{done_ct}</div>
+              <div class="sl">Done</div>
+            </div>
+            <div class="snap-cell">
+              <div class="sv">{total}</div>
+              <div class="sl">Min</div>
             </div>
           </div>
-          <div style="background:rgba(255,255,255,0.08);border-radius:8px;height:6px;overflow:hidden;margin-bottom:0.4rem;">
-            <div style="height:100%;width:{pct}%;background:linear-gradient(90deg,#818cf8,#a78bfa);border-radius:8px;transition:width 0.3s;"></div>
+          <div style="background:rgba(255,255,255,0.08);border-radius:100px;height:7px;overflow:hidden;margin-bottom:0.45rem;">
+            <div style="height:100%;width:{pct}%;background:linear-gradient(90deg,#38bdf8,#7dd3fc);
+                        border-radius:100px;transition:width 0.4s;"></div>
           </div>
-          <div style="font-size:0.72rem;opacity:0.55;text-align:right;">
-            {"⚠️ " + str(over) + " min over" if over else "✓ " + str(remaining) + " min left"}
+          <div style="font-size:0.72rem;opacity:0.5;display:flex;justify-content:space-between;
+                      font-family:'Nunito',sans-serif;font-weight:700;">
+            <span>{pct}% used</span>
+            <span>{budget_status}</span>
           </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# MAIN — hero banner
+# HERO BANNER
 # ══════════════════════════════════════════════════════════════════════════════
-
 if st.session_state.tools:
-    s = sched()
-    emoji = SPECIES_EMOJI.get(species, "🐾")
-    completed = sum(1 for t in s.tasks if t.is_completed)
-    st.markdown(f"""
+    s            = sched()
+    emoji        = SPECIES_EMOJI.get(species, "🐾")
+    completed    = sum(1 for t in s.tasks if t.is_completed)
+    pending      = len(s.tasks) - completed
+    task_word    = "tasks" if len(s.tasks) != 1 else "task"
+    done_pill    = f'<span class="pill">{completed} done</span>' if completed else ''
+    pending_pill = f'<span class="pill">{pending} pending</span>' if pending else ''
+    st.html(f"""
     <div class="paw-hero">
-      <div class="emoji-bubble">{emoji}</div>
-      <div>
-        <h2>Hey {s.owner.name}! 👋</h2>
-        <p>{s.pet.name} · {s.pet.breed} · {s.pet.age_years}yr</p>
-        <span class="pill">{'✅ ' + str(completed) + ' done · ' if completed else ''}{len(s.tasks)} task{'s' if len(s.tasks) != 1 else ''} today</span>
+      <div class="pet-avatar">{emoji}</div>
+      <div class="hero-content">
+        <div style="margin:0;font-size:1.7rem;font-weight:900;letter-spacing:-0.02em;font-family:'Nunito',sans-serif;line-height:1.2;">Hey {s.owner.name}!</div>
+        <p class="hero-sub">{s.pet.name} · {s.pet.breed} · {s.pet.age_years} yr old {s.pet.species}</p>
+        <div class="pill-row">
+          <span class="pill">{len(s.tasks)} {task_word}</span>
+          {done_pill}
+          {pending_pill}
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat">
+          <div class="hval">{s.owner.available_minutes}</div>
+          <div class="hlbl">min/day</div>
+        </div>
+        <div class="hstat">
+          <div class="hval">{s.get_total_duration()}</div>
+          <div class="hlbl">scheduled</div>
+        </div>
       </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 else:
-    st.markdown("""
+    st.html("""
     <div class="paw-hero">
-      <div class="emoji-bubble">🐾</div>
-      <div>
-        <h2>Welcome to PawPal+</h2>
-        <p>Fill in the profile on the left to get started.</p>
+      <div class="pet-avatar">🐾</div>
+      <div class="hero-content">
+        <div style="margin:0;font-size:1.7rem;font-weight:900;letter-spacing:-0.02em;font-family:'Nunito',sans-serif;line-height:1.2;">Welcome to PawPal+</div>
+        <p class="hero-sub">Your smart pet care scheduling assistant</p>
+        <div class="pill-row">
+          <span class="pill">Set up your profile to get started</span>
+        </div>
       </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TABS
 # ══════════════════════════════════════════════════════════════════════════════
-
 tab_tasks, tab_schedule, tab_ai = st.tabs(["📋  Tasks", "📅  Schedule", "🤖  AI Assistant"])
 
 # ── TAB 1 — Tasks ─────────────────────────────────────────────────────────────
 with tab_tasks:
     s = sched()
 
-    # Stats row
     if s:
         total      = s.get_total_duration()
         budget     = s.owner.available_minutes
@@ -476,42 +694,65 @@ with tab_tasks:
         high_count = sum(1 for t in s.tasks if t.is_high_priority())
         done_count = sum(1 for t in s.tasks if t.is_completed)
 
+        tl_class  = "red" if time_left < 0 else "green"
+        tl_label  = "Min Over" if time_left < 0 else "Min Free"
+
         col_a, col_b, col_c, col_d = st.columns(4)
-        col_a.markdown(f'<div class="stat-card"><div class="val blue">{len(s.tasks)}</div><div class="lbl">Tasks</div></div>', unsafe_allow_html=True)
-        col_b.markdown(f'<div class="stat-card"><div class="val">{total}</div><div class="lbl">Minutes</div></div>', unsafe_allow_html=True)
-        col_c.markdown(f'<div class="stat-card"><div class="val {"red" if time_left < 0 else "green"}">{abs(time_left)}</div><div class="lbl">{"Over" if time_left < 0 else "Remaining"}</div></div>', unsafe_allow_html=True)
-        col_d.markdown(f'<div class="stat-card"><div class="val">{done_count}</div><div class="lbl">Done</div></div>', unsafe_allow_html=True)
+        col_a.html(f"""
+        <div class="stat-card blue">
+          <div class="val blue">{len(s.tasks)}</div>
+          <div class="lbl">Total Tasks</div>
+        </div>""")
+        col_b.html(f"""
+        <div class="stat-card {tl_class}">
+          <div class="val {tl_class}">{abs(time_left)}</div>
+          <div class="lbl">{tl_label}</div>
+        </div>""")
+        col_c.html(f"""
+        <div class="stat-card red">
+          <div class="val red">{high_count}</div>
+          <div class="lbl">High Priority</div>
+        </div>""")
+        col_d.html(f"""
+        <div class="stat-card green">
+          <div class="val green">{done_count}</div>
+          <div class="lbl">Completed</div>
+        </div>""")
 
-        st.markdown("<div style='height:0.25rem'></div>", unsafe_allow_html=True)
+        st.html("<div style='height:0.15rem'></div>")
 
-        # Budget bar
-        fill = min(total / budget, 1.0) if budget else 0
-        bar_color = "#ef4444" if time_left < 0 else "#6366f1"
-        st.markdown(f"""
+        fill       = min(total / budget, 1.0) if budget else 0
+        over_txt   = f'{abs(time_left)} min over budget' if time_left < 0 else f'{time_left} min remaining'
+        over_color = '#ef4444' if time_left < 0 else '#10b981'
+        st.html(f"""
         <div class="budget-bar-wrap">
           <div class="bar-label">
-            <span>⏱ Daily Budget</span>
-            <span>{total} / {budget} min</span>
+            <span>Daily Budget</span>
+            <span style="color:{over_color};">{over_txt}</span>
           </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
         st.progress(fill)
 
     # Add task form
-    st.markdown('<div class="section-title">Add New Task</div>', unsafe_allow_html=True)
-    st.markdown('<div class="add-form-card">', unsafe_allow_html=True)
-    fc1, fc2, fc3, fc4 = st.columns([3, 1.5, 1.5, 1])
-    with fc1: task_title    = st.text_input("Task", value="Morning walk", label_visibility="collapsed", placeholder="Task name")
-    with fc2: duration      = st.number_input("Duration", min_value=1, max_value=240, value=20, label_visibility="collapsed")
-    with fc3: priority_sel  = st.selectbox("Priority", ["high","medium","low"], label_visibility="collapsed")
+    st.html("""
+    <div class="section-label">New Task</div>
+    <div class="add-form-card">
+      <div class="form-header">Add a Care Task</div>
+    """)
+
+    fc1, fc2, fc3, fc4 = st.columns([3, 1.5, 1.5, 1.1])
+    with fc1: task_title   = st.text_input("Task",     value="Morning walk", label_visibility="collapsed", placeholder="e.g. Morning walk, Feeding, Grooming…")
+    with fc2: duration     = st.number_input("Duration", min_value=1, max_value=240, value=20, label_visibility="collapsed")
+    with fc3: priority_sel = st.selectbox("Priority", ["high","medium","low"], label_visibility="collapsed")
     with fc4:
-        st.markdown("<div style='height:1.78rem'></div>", unsafe_allow_html=True)
-        add_clicked = st.button("＋ Add", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.html("<div style='height:1.78rem'></div>")
+        add_clicked = st.button("Add", use_container_width=True)
+    st.html("</div>")
 
     if add_clicked:
         if not st.session_state.tools:
-            st.warning("Save your profile first.")
+            st.warning("Save your pet profile first (sidebar).")
         else:
             st.session_state.tools.schedule.add_task(
                 Task(task_type=task_title, duration_minutes=int(duration), priority=PRIORITY_MAP[priority_sel])
@@ -519,129 +760,152 @@ with tab_tasks:
             st.rerun()
 
     # Task list
-    st.markdown('<div class="section-title">Task List</div>', unsafe_allow_html=True)
+    st.html('<div class="section-label">Task List</div>')
 
     if s and s.tasks:
         for i, task in enumerate(s.tasks):
-            p_color = PRIORITY_COLOR.get(task.priority, "#94a3b8")
-            p_label = PRIORITY_LABEL.get(task.priority, str(task.priority))
-            p_badge = PRIORITY_BADGE.get(task.priority, "")
-            done_cls = "done-card" if task.is_completed else ""
-            status_icon = "✅" if task.is_completed else "⏳"
+            p_color    = PRIORITY_COLOR.get(task.priority, "#94a3b8")
+            p_label    = PRIORITY_LABEL.get(task.priority, str(task.priority))
+            p_badge    = PRIORITY_BADGE.get(task.priority, "")
+            done_cls   = "done-card" if task.is_completed else ""
+            icon       = task_icon(task.task_type)
+            notes_text = task.notes if task.notes else "No notes"
 
             left, right = st.columns([10, 1])
             with left:
-                st.markdown(f"""
+                st.html(f"""
                 <div class="task-card {done_cls}">
-                  <div class="dot" style="background:{p_color};"></div>
-                  <div>
-                    <div class="name">{status_icon} {task.task_type}</div>
-                    <div class="meta">⏱ {task.duration_minutes} min · {'Notes: ' + task.notes if task.notes else 'No notes'}</div>
+                  <div class="priority-bar" style="background:{p_color};"></div>
+                  <div class="task-icon">{icon}</div>
+                  <div style="flex:1;min-width:0;">
+                    <div class="name">{task.task_type}</div>
+                    <div class="meta">{task.duration_minutes} min · {notes_text}</div>
                   </div>
-                  <span class="badge {p_badge}">{p_label}</span>
+                  <div class="right">
+                    <span class="badge {p_badge}">{p_label}</span>
+                  </div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
             with right:
                 if not task.is_completed:
-                    if st.button("✓", key=f"done_{i}", help="Mark done"):
+                    if st.button("✓", key=f"done_{i}", help="Mark complete"):
                         task.complete()
                         st.rerun()
                 else:
-                    st.button("↩", key=f"undo_{i}", help="Undo", disabled=True)
+                    st.button("✓", key=f"undo_{i}", disabled=True)
     else:
-        st.markdown("""
+        st.html("""
         <div class="empty-state">
-          <div class="icon">🦴</div>
-          <p>No tasks yet — add one above!</p>
+          <span class="paw-icon">🐾</span>
+          <div class="etitle">No tasks yet</div>
+          <p class="esub">Add your first pet care task above to get started.</p>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
 # ── TAB 2 — Schedule ──────────────────────────────────────────────────────────
 with tab_schedule:
     s = sched()
 
-    gen_col, _ = st.columns([2, 5])
+    gen_col, _ = st.columns([2.5, 5])
     with gen_col:
-        generate = st.button("⚡ Generate Schedule", use_container_width=True)
+        generate = st.button("Generate Schedule", use_container_width=True)
 
     if generate:
         if not s:
-            st.warning("Save your profile first.")
+            st.warning("Save your pet profile first (sidebar).")
         elif not s.tasks:
-            st.warning("Add at least one task first.")
+            st.warning("Add at least one task in the Tasks tab first.")
         else:
             conflicts = s.check_conflicts()
             for c in conflicts:
                 st.warning(c)
             if not conflicts:
-                st.success("No conflicts — good to go!")
+                st.success("No conflicts — your schedule looks great!")
             st.session_state.last_plan = s.generate_plan()
 
     plan = getattr(st.session_state, "last_plan", None)
 
     if plan and s:
-        total = s.get_total_duration()
+        total  = s.get_total_duration()
         budget = s.owner.available_minutes
 
+        budget_class = "red" if total > budget else "green"
         m1, m2, m3 = st.columns(3)
-        m1.markdown(f'<div class="stat-card"><div class="val blue">{len(plan)}</div><div class="lbl">Scheduled</div></div>', unsafe_allow_html=True)
-        m2.markdown(f'<div class="stat-card"><div class="val">{total}</div><div class="lbl">Total min</div></div>', unsafe_allow_html=True)
-        m3.markdown(f'<div class="stat-card"><div class="val {"red" if total > budget else "green"}">{budget}</div><div class="lbl">Budget min</div></div>', unsafe_allow_html=True)
+        m1.html(f"""
+        <div class="stat-card blue">
+          <div class="val blue">{len(plan)}</div>
+          <div class="lbl">Scheduled</div>
+        </div>""")
+        m2.html(f"""
+        <div class="stat-card sky">
+          <div class="val sky">{total}</div>
+          <div class="lbl">Total Min</div>
+        </div>""")
+        m3.html(f"""
+        <div class="stat-card {budget_class}">
+          <div class="val {budget_class}">{budget}</div>
+          <div class="lbl">Budget Min</div>
+        </div>""")
 
-        st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
+        st.html("<div style='height:0.5rem'></div>")
 
         if total > budget:
-            st.error(f"Schedule is {total - budget} min over budget.")
+            st.error(f"Schedule is **{total - budget} min over budget** — consider removing lower-priority tasks.")
         else:
-            st.success(f"Fits within budget — {budget - total} min to spare.")
+            st.success(f"Schedule fits within budget with **{budget - total} min to spare!**")
 
-        st.markdown('<div class="section-title">Today\'s Plan</div>', unsafe_allow_html=True)
+        st.html('<div class="section-label">Today\'s Plan</div>')
 
         for i, task in enumerate(plan):
-            p_color = PRIORITY_COLOR.get(task.priority, "#94a3b8")
             p_label = PRIORITY_LABEL.get(task.priority, str(task.priority))
             p_badge = PRIORITY_BADGE.get(task.priority, "")
+            icon    = task_icon(task.task_type)
 
-            st.markdown(f"""
+            st.html(f"""
             <div class="timeline-item">
               <div class="timeline-dot">{i+1}</div>
               <div class="timeline-card">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div class="ticon">{icon}</div>
+                <div style="flex:1;min-width:0;">
                   <div class="tname">{task.task_type}</div>
-                  <span class="badge {p_badge}" style="margin-left:auto;">{p_label}</span>
+                  <div class="tmeta">{task.duration_minutes} min · Priority {task.priority}/10</div>
                 </div>
-                <div class="tmeta">⏱ {task.duration_minutes} min · Priority {task.priority}/10</div>
+                <div class="tright">
+                  <span class="badge {p_badge}">{p_label}</span>
+                </div>
               </div>
             </div>
-            """, unsafe_allow_html=True)
+            """)
     else:
-        st.markdown("""
+        st.html("""
         <div class="empty-state">
-          <div class="icon">📅</div>
-          <p>Hit <strong>Generate Schedule</strong> to build your day.</p>
+          <span class="paw-icon">🐾</span>
+          <div class="etitle">No schedule yet</div>
+          <p class="esub">Hit <strong>Generate Schedule</strong> to build your optimised daily plan.</p>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
 # ── TAB 3 — AI Assistant ──────────────────────────────────────────────────────
 with tab_ai:
     has_key = bool(os.environ.get("GROQ_API_KEY"))
 
     if not has_key:
-        st.markdown("""
+        st.html("""
         <div class="empty-state">
-          <div class="icon">🔑</div>
-          <p>Add <code>GROQ_API_KEY=your_key</code> to <code>.env</code> to enable AI.</p>
+          <span class="paw-icon">🐾</span>
+          <div class="etitle">API Key Required</div>
+          <p class="esub">Add <code>GROQ_API_KEY=your_key</code> to your <code>.env</code> file to enable the AI assistant.</p>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     elif not st.session_state.tools:
-        st.markdown("""
+        st.html("""
         <div class="empty-state">
-          <div class="icon">🤖</div>
-          <p>Save your pet profile (sidebar) to activate the AI assistant.</p>
+          <span class="paw-icon">🐾</span>
+          <div class="etitle">Profile Required</div>
+          <p class="esub">Save your pet profile in the sidebar to activate the AI assistant.</p>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     else:
-        # Lazy-init agent (shares SchedulerTools state with the manual UI)
         if st.session_state.agent is None:
             try:
                 from agent.scheduler_agent import SchedulerAgent
@@ -651,24 +915,23 @@ with tab_ai:
 
         agent = st.session_state.agent
         if agent:
-            # Suggested prompts (click to fill)
             if not st.session_state.chat_history:
-                st.markdown("""
-                <div style="margin-bottom:1rem;">
-                  <div class="section-title">Try asking…</div>
+                st.html("""
+                <div class="section-label">Try asking</div>
+                <div class="chip-row">
                   <span class="prompt-chip">Add a 30-min walk at high priority</span>
                   <span class="prompt-chip">Build me a full day schedule</span>
                   <span class="prompt-chip">Check for conflicts</span>
                   <span class="prompt-chip">What tasks are left?</span>
+                  <span class="prompt-chip">Add a feeding task</span>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
 
-            # Chat history
             for msg in st.session_state.chat_history:
                 with st.chat_message(msg["role"]):
                     st.markdown(msg["content"])
 
-            user_input = st.chat_input("Ask PawPal+ anything about your schedule…")
+            user_input = st.chat_input(f"Ask PawPal+ about {pet_name}'s schedule…")
 
             if user_input:
                 st.session_state.chat_history.append({"role": "user", "content": user_input})
@@ -676,7 +939,7 @@ with tab_ai:
                     st.markdown(user_input)
 
                 with st.chat_message("assistant"):
-                    with st.spinner("PawPal+ is thinking…"):
+                    with st.spinner("Thinking…"):
                         try:
                             reply = agent.run(user_input)
                         except Exception as exc:

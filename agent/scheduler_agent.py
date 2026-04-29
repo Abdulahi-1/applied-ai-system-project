@@ -15,7 +15,7 @@ import os
 import json
 from typing import Optional
 from dotenv import load_dotenv
-from openai import OpenAI
+from groq import Groq
 
 from agent.tools import SchedulerTools
 
@@ -142,7 +142,7 @@ class SchedulerAgent:
                 "GROQ_API_KEY is not set. "
                 "Add GROQ_API_KEY=<your_key> to your .env file."
             )
-        self._client = OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
+        self._client = Groq(api_key=api_key)
 
         self._inst = tools_instance or SchedulerTools(
             owner_name, pet_name, available_minutes
