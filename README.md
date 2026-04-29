@@ -141,7 +141,7 @@ Try these in the AI Assistant tab:
 
 ### Limitations and biases in this system
 
-One thing I realised early on is that the AI is only as useful as the information you give it. Because there is no persistent memory between sessions, the assistant starts fresh every time — it has no idea what tasks you completed yesterday, how your pet has been doing, or what routines have worked in the past. That makes it helpful for quick planning but not great as a long-term care companion.
+One thing I realized early on is that the AI is only as useful as the information you give it. Because there is no persistent memory between sessions, the assistant starts fresh every time — it has no idea what tasks you completed yesterday, how your pet has been doing, or what routines have worked in the past. That makes it helpful for quick planning but not great as a long-term care companion.
 
 I also noticed that the model was trained mostly on English-language text, which means it tends to reflect Western assumptions about pet care. If someone described a care routine that is common in another culture, I am not confident the model would handle it well. On top of that, the model has no actual veterinary knowledge — it can generate a schedule that sounds reasonable, but it cannot tell the difference between good advice and advice that could genuinely harm an animal. That is a real limitation I did not fully appreciate until I started testing it.
 
