@@ -30,6 +30,13 @@ applied-ai-system-project/
 ├── requirements.txt          # Python dependencies
 └── README.md
 ```
+## Video Walkthrough
+
+
+
+https://github.com/user-attachments/assets/3b7d28d6-802e-41a5-a7c4-b88ed3461388
+
+
 
 ## Setup
 
