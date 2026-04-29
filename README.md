@@ -1,6 +1,6 @@
 # PawPal++ — AI Pet Care Scheduler
 
-PawPal+ helps pet owners plan their daily pet care routines. You can add tasks manually through a form-based UI or chat with an AI assistant that builds and manages your schedule for you — both views share the same live schedule, so changes from either side appear instantly.
+PawPal++ helps pet owners plan their daily pet care routines. You can add tasks manually through a form-based UI or chat with an AI assistant that builds and manages your schedule for you — both views share the same live schedule, so changes from either side appear instantly.
 
 ## Features
 
